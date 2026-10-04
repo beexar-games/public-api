@@ -4,7 +4,7 @@
 pip install beexar
 ```
 
-Zero runtime dependencies — standard library only. Python 3.9+.
+Zero runtime dependencies — standard library only. Python 3.11+.
 Source: https://github.com/beexar-games/beexar-python
 
 ## Launcher

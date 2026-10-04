@@ -4,7 +4,7 @@
 composer require beexar/sdk
 ```
 
-Zero runtime dependencies — no bcmath, no gmp, no HTTP client. PHP 8.1+.
+Zero runtime dependencies — no bcmath, no gmp, no HTTP client. PHP 8.3+.
 Source: https://github.com/beexar-games/beexar-php
 
 ## Launcher

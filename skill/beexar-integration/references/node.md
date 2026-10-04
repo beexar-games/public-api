@@ -4,7 +4,7 @@
 npm install @beexar/sdk
 ```
 
-Zero runtime dependencies. ESM and CommonJS. Node 18+.
+Zero runtime dependencies. ESM and CommonJS. Node 22+.
 Source: https://github.com/beexar-games/beexar-node
 
 ## Launcher

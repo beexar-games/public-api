@@ -22,7 +22,7 @@ the second one is the work.
 | Contract | Version |
 |---|---|
 | `api/common/schemas.yaml` | `v.2026.06.20` |
-| `api/gateway.yaml` | `v.2026.06.09` |
+| `api/gateway.yaml` | `v.2026.09.28` |
 | `api/providers/softswiss/wallet.yaml` | `v.2026.03.03` |
 | `api/softswiss/gateway.yaml` | `v.2026.06.20` |
 

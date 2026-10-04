@@ -4,7 +4,7 @@
 go get github.com/beexar-games/beexar-go
 ```
 
-Zero dependencies — standard library only, in the SDK and in its tests. Go 1.22+.
+Zero dependencies — standard library only, in the SDK and in its tests. Go 1.26+.
 Source: https://github.com/beexar-games/beexar-go
 
 ## Launcher
