@@ -37,6 +37,10 @@ SDK handles signature verification, parsing, validation, decimal money and the
 error envelope. All four ship a complete reference wallet you can read in one
 sitting.
 
+Freespins are covered the same way: the client issues and cancels them and
+reads the bet levels, and an optional fifth method settles their result on the
+`/freespins/finish` callback.
+
 Every SDK has **zero runtime dependencies**.
 
 ## Integrate without an SDK
@@ -45,8 +49,8 @@ The contract is small and the specs are here:
 
 | Spec | What it describes |
 |---|---|
-| [`openapi/providers/softswiss/wallet.yaml`](openapi/providers/softswiss/wallet.yaml) | the four callbacks **you** implement |
-| [`openapi/softswiss/gateway.yaml`](openapi/softswiss/gateway.yaml) | launching a real or demo session |
+| [`openapi/providers/softswiss/wallet.yaml`](openapi/providers/softswiss/wallet.yaml) | the callbacks **you** implement — four, plus `/freespins/finish` if you issue freespins |
+| [`openapi/softswiss/gateway.yaml`](openapi/softswiss/gateway.yaml) | launching a real or demo session, issuing and canceling freespins, the bet levels |
 | [`openapi/gateway.yaml`](openapi/gateway.yaml) | the operator game catalogue |
 | [`openapi/common/schemas.yaml`](openapi/common/schemas.yaml) | shared schemas |
 

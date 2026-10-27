@@ -11,6 +11,11 @@ it is testable.
 | `POST /betwin` | debit and/or credit, atomically | `round_id`, `transactions[]` of `{id_provider, type: bet\|win, amount}` |
 | `POST /rollback` | reverse earlier transactions | `round_id_provider`, `transactions[]` of `{id_provider, original_id_provider}` |
 | `POST /finish` | close the round | `round_id` — no `game_id` |
+| `POST /freespins/finish` | *optional* — credit what a freespins issue won | `issue_id`, `amount` (may be zero) |
+
+The fifth one exists only for an operator that issues freespins; see
+`freespins.md`. It goes to its own URL, and the SDKs route `/freespins/finish`
+before `/finish` although both end the same way.
 
 Two naming traps, both worth a test:
 
@@ -83,6 +88,16 @@ not an error.
 `/betwin` may carry `finished: true`, which closes the round then and there.
 When it does not, `/finish` arrives separately. Both must be idempotent;
 `/finish` simply answers the current balance.
+
+## `/freespins/finish`
+
+Idempotent on `issue_id`, with the same discipline as `id_provider`: credit
+`amount` once, store the balance you answered, and answer a repeat with that
+stored balance. Zero is a valid amount (`"0.00"`, or `"0"` in a currency
+without decimals). An unknown `issue_id` is api_code
+`610`, an issue whose cancel Beexar accepted `605` — Beexar never sends a
+Finish for one, so a `605` to a Finish you did receive is retried like any
+refusal. Details in `freespins.md`.
 
 ## Errors
 

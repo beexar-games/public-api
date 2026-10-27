@@ -1,10 +1,12 @@
 # Integrating without an SDK
 
 Any language. The whole contract is four inbound endpoints and three outbound
-calls, and the OpenAPI documents are public:
+calls — plus, for freespins, three more outbound calls and an optional fifth
+inbound endpoint (`freespins.md`) — and the OpenAPI documents are public:
 
-- `https://docs.beexar.com/api/wallet.yaml` — the four callbacks **you** implement
-- `https://docs.beexar.com/api/softswiss/gateway.yaml` — the launcher
+- `https://docs.beexar.com/api/wallet.yaml` — the callbacks **you** implement
+- `https://docs.beexar.com/api/softswiss/gateway.yaml` — the launcher and the
+  freespins calls
 - `https://docs.beexar.com/api/gateway.yaml` — the catalogue
 - `https://docs.beexar.com/api/common/schemas.yaml` — shared schemas
 
@@ -33,9 +35,14 @@ Compare in constant time (`hmac.compare_digest`, `hash_equals`, `crypto.timingSa
 
 - `currency` matches `^[A-Z][A-Z0-9_]{2,31}$`. Reject lowercase; do not upcase it.
 - `amount` matches `^\d+(\.\d{1,16})?$`, is at most 40 characters, and is
-  greater than zero. **Reject the exponent form.** `"1E2000000000"` parses
+  greater than zero — except on `/freespins/finish`, where zero (`"0.00"`, or
+  `"0"` in a currency without decimals) is a valid result (the wallet spec's
+  pattern for that field admits 18 fractional digits, as SoftSwiss's does;
+  Beexar never sends more than the currency's scale, at most 16). **Reject the exponent form.** `"1E2000000000"` parses
   instantly in every bignum library and then allocates gigabytes on the first
   rescale — the guard has to run on the shape, before any arithmetic.
+- Route on the path suffix if you serve several callbacks under one prefix, and
+  try `/freespins/finish` before `/finish`: it ends with `/finish` too.
 - Request bodies over **64 KiB** are refused. Enforce it on bytes actually read,
   not on `Content-Length`.
 - Unknown JSON fields are **tolerated on purpose** — the contract is

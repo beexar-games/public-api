@@ -83,10 +83,30 @@ Money.fromMinorUnits(9970n, 2)                             // from an integer le
 
 `Money` has no `fromNumber`, and `money + 1` throws.
 
+## Freespins (optional)
+
+Read `freespins.md` first.
+
+```ts
+const levels = await beexar.betLevels({ games: ['dice'], currencies: ['EUR'] }) // BetLevelData[]
+await beexar.issueFreespins({
+  issue_id: 'fs-123', games: ['dice'], freespins_quantity: 10, bet_level: 1,
+  valid_until: '2026-12-01T00:00:00Z', account: { id: 'player_123', currency: 'EUR' },
+})
+await beexar.cancelFreespins({ issue_id: 'fs-123' })
+```
+
+The callback is the optional `freespinsFinish(req, ctx)` on the same
+`WalletHandler`; `req.issue_id` and `req.amount` (a `Money`, possibly zero).
+Answer `{ balance }`; refuse with `WalletError.invalidFreespinsIssue()` (610) or
+`WalletError.freespinsStateTransition()` (605). Every binding routes
+`/freespins/finish`; without the method it answers api_code 404.
+
 ## Reference implementation
 
 `examples/inmemory-wallet.ts` in the repository — a complete, correct wallet in
-~250 lines, with the dedupe/tombstone/apply order spelled out.
+~250 lines, with the dedupe/tombstone/apply order spelled out, and the
+freespins result credited once per `issue_id`.
 
 ## Build check
 

@@ -1,6 +1,7 @@
 # Launching a game
 
-Three calls. Two are signed; one is public.
+Three calls. Two are signed; one is public. Freespins add three more signed
+calls on the same endpoint family — see `freespins.md`.
 
 ## Start a real-money session
 
@@ -22,8 +23,10 @@ Put that URL in an iframe. Do not proxy the game through your own server, and do
 not cache the URL — the token identifies one session.
 
 `account` may also carry `firstname`, `lastname`, `nickname`, `email`,
-`country`, `date_of_birth`, `registered_at` and `tags`. `urls.return_url` and
-`urls.deposit_url` control where the game's own navigation sends the player.
+`country`, `date_of_birth`, `registered_at` and `tags`. `urls.return_url` is
+the game's Home (lobby) button and `urls.deposit_url` its Deposit button and
+low-balance prompt: any `scheme://host…` (`https://…` or a native app's
+`myapp://lobby`); omit one and the game shows no such button.
 
 ## Start a demo session
 

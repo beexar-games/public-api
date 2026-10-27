@@ -26,5 +26,11 @@ This is the part of the contract nobody reads until production.
   not advice, it is the only thing keeping a retry from double-charging.
 - **Not retried:** insufficient funds, bet limits, bad requests and signature
   failures. Those are terminal answers, and the player sees the result.
+- **Except `/freespins/finish`:** it pays the player an issue's win, so a
+  Finish that got no 200 — refused or unanswered — is sent again, the same
+  body for the same `issue_id`, after 1, 3 and 5 minutes, then every 5
+  minutes until you accept it. Credit it once and answer a repeat with the
+  balance you answered first. One attempt per retry, each within
+  `OperatorAttemptTimeout` (table above); a slower answer counts as no answer.
 - Do the heavy work outside the handler. Anything slower than the attempt
   timeout should already have happened before the callback arrives.

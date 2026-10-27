@@ -82,10 +82,31 @@ Money.from_minor_units(9970, 2)                       # from an integer ledger
 
 `Money` raises on `float()`, on `+` and on `-`, so a number cannot leak in.
 
+## Freespins (optional)
+
+Read `freespins.md` first.
+
+```python
+levels = beexar.bet_levels(games=["dice"], currencies=["EUR"])
+beexar.issue_freespins({
+    "issue_id": "fs-123", "games": ["dice"], "freespins_quantity": 10, "bet_level": 1,
+    "valid_until": "2026-12-01T00:00:00Z",
+    "account": {"id": "player_123", "currency": "EUR"},
+})
+beexar.cancel_freespins({"issue_id": "fs-123"})
+```
+
+The callback is an optional fifth method on the same handler,
+`freespins_finish(self, request, context)`; `request.issue_id` and
+`request.amount` (a `Money`, possibly zero). Return a `FreespinsFinishResult`;
+refuse with `WalletError.invalid_freespins_issue()` (610) or
+`WalletError.freespins_state_transition()` (605). The FastAPI, Flask and ASGI
+bindings route `/freespins/finish`; without the method it answers api_code 404.
+
 ## Reference implementation
 
-`examples/inmemory_wallet.py` in the repository. `examples/server.py` is a
-runnable framework-free server.
+`examples/inmemory_wallet.py` in the repository, freespins result included.
+`examples/server.py` is a runnable framework-free server.
 
 ## Build check
 

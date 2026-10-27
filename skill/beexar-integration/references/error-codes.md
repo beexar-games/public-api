@@ -37,16 +37,17 @@ three constructors for exactly that reason.
 | `153` | `APICodeCountryRestricted` | Game is not available in Player's country |
 | `154` | `APICodeCurrencyNotAllowed` | Currency is not allowed for the player |
 | `155` | `APICodeFieldImmutable` | Forbidden to change already set field |
-| `400` | `APICodeBadRequest` | Bad request (invalid JSON, validation error) |
-| `403` | `APICodeForbidden` | Forbidden (signature mismatch) |
+| `400` | `APICodeBadRequest` | Bad request (the JSON is malformed or fails validation) |
+| `403` | `APICodeForbidden` | Forbidden (the request signature doesn't match) |
 | `404` | `APICodeNotFound` | Not found |
 | `405` | `APICodeGameNotAvailable` | Game is not available to your casino |
-| `406` | `APICodeFreespinsNotAvailable` | Freespins are not available for your casino |
+| `406` | `APICodeFreespinsNotAvailable` | This feature is not enabled for your casino |
 | `409` | `APICodeTombstoned` | Action already rolled back (tombstoned) |
 | `410` | `APICodeCasinoDisabled` | Casino is disabled |
 | `411` | `APICodeEndpointDisabledCasino` | This endpoint is disabled in the casino configuration |
 | `420` | `APICodeEndpointDisabledProvider` | This endpoint is disabled in the provider configuration |
 | `421` | `APICodeEventTypeNotAllowed` | The specified event_type is not allowed |
+| `425` | `APICodeDataNotReady` | Requested data is not ready yet. Please retry later |
 | `500` | `APICodeUnknownError` | Unknown error |
 | `501` | `APICodeProviderNotConfigured` | Provider is not configured for your casino |
 | `502` | `APICodeExternalServiceError` | Unknown error in external service |
@@ -57,8 +58,9 @@ three constructors for exactly that reason.
 | `602` | `APICodeFreespinsNoGame` | You shall provide at least one game to issue freespins |
 | `603` | `APICodeFreespinsBadExpiration` | Bad expiration date |
 | `605` | `APICodeFreespinsStateTransition` | Can't change issue state from its current to requested |
-| `606` | `APICodeFreespinsNotSynced` | Can't change issue state when issue status is not synced |
+| `606` | `APICodeFreespinsNotSynced` | You can't change issue state when issue status is not synced |
 | `607` | `APICodeFreespinsDiffProviders` | Can't issue freespins for different game providers |
+| `608` | `APICodeFeatureNotSupported` | Feature is not supported for the requested game |
 | `610` | `APICodeFreespinsInvalidIssue` | Invalid freespins issue |
 | `611` | `APICodeFreespinsExpired` | Freespins issue has already expired |
 | `620` | `APICodeFreespinsCantCancel` | Freespins issue can't be canceled |
@@ -70,4 +72,8 @@ As an operator serving the wallet callbacks you will realistically return:
 `100` (no funds), `101` (unknown player), `105`/`106` (limits), `110`
 (player disabled), `400` (bad request), `403` (bad signature), `409`
 (already rolled back) and `500` (your side failed — the platform will retry).
+On `/freespins/finish`: `610` (an issue you do not know) and `605` (an issue
+whose Cancel Beexar accepted — Beexar never sends a Finish for one). A `605`
+to a Finish you did receive says Beexar did not accept that cancel, or never
+saw it: the win is still owed and the same Finish is retried (see timings).
 The rest describe platform-side conditions you receive rather than send.

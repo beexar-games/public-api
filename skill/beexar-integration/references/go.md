@@ -77,10 +77,31 @@ beexar.MoneyFromMinorUnits(big.NewInt(9970), 2)                            // fr
 
 `Money` marshals to a JSON string and has no float constructor.
 
+## Freespins (optional)
+
+Read `freespins.md` first.
+
+```go
+levels, err := client.BetLevels(ctx, beexar.BetLevelsRequest{Games: []string{"dice"}}) // []beexar.BetLevelData
+err = client.IssueFreespins(ctx, beexar.FreespinsIssueRequest{
+    IssueID: "fs-123", Games: []string{"dice"}, FreespinsQuantity: 10, BetLevel: 1,
+    ValidUntil: time.Now().UTC().Add(7 * 24 * time.Hour).Format(time.RFC3339),
+    Account:    beexar.LaunchAccount{ID: "player_123", Currency: "EUR"},
+})
+err = client.CancelFreespins(ctx, beexar.FreespinsCancelRequest{IssueID: "fs-123"})
+```
+
+The callback is the optional `beexar.FreespinsFinishHandler` — a
+`FreespinsFinish(ctx, req, rc)` method on the same value you pass to
+`NewWalletServer`; `req.IssueID` and `req.Amount` (a `beexar.Money`, possibly
+zero). Refuse with `beexar.ErrInvalidFreespinsIssue("")` (610) or
+`beexar.ErrFreespinsStateTransition("")` (605). `NewHandler` routes
+`/freespins/finish`; without the method it answers api_code 404.
+
 ## Reference implementation
 
-`examples/inmemory` in the repository — a complete, correct wallet.
-`examples/server` is a runnable server.
+`examples/inmemory` in the repository — a complete, correct wallet, freespins
+result included. `examples/server` is a runnable server.
 
 ## Build check
 

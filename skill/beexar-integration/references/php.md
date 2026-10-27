@@ -80,10 +80,33 @@ Money::fromMinorUnits('9970', 2);                            // from an integer 
 Arithmetic runs on digit strings, so no extension is required and no digit is
 lost. There is no float constructor.
 
+## Freespins (optional)
+
+Read `freespins.md` first.
+
+```php
+$levels = $beexar->betLevels(games: ['dice'], currencies: ['EUR']);
+$beexar->issueFreespins([
+    'issue_id' => 'fs-123', 'games' => ['dice'], 'freespins_quantity' => 10, 'bet_level' => 1,
+    'valid_until' => gmdate('Y-m-d\TH:i:s\Z', time() + 7 * 86400),
+    'account' => ['id' => 'player_123', 'currency' => 'EUR'],
+]);
+$beexar->cancelFreespins(['issue_id' => 'fs-123']);
+```
+
+The callback is the optional `Beexar\FreespinsFinishHandler` interface —
+`freespinsFinish(FreespinsFinishRequest $request, RequestContext $context):
+FreespinsFinishResult` on the same class as `WalletHandler`; `$request->issueId`
+and `$request->amount` (a `Money`, possibly zero). Refuse with
+`WalletError::invalidFreespinsIssue()` (610) or
+`WalletError::freespinsStateTransition()` (605). `handleGlobals()` and
+`WalletMiddleware` route `/freespins/finish`; without the interface it answers
+api_code 404.
+
 ## Reference implementation
 
-`examples/InMemoryWallet.php` in the repository. `examples/server.php` is a
-runnable framework-free server.
+`examples/InMemoryWallet.php` in the repository, freespins result included.
+`examples/server.php` is a runnable framework-free server.
 
 ## Build check
 

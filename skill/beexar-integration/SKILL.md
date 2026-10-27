@@ -1,6 +1,6 @@
 ---
 name: beexar-integration
-description: Integrate the Beexar casino game platform into a codebase. Covers the official Node, PHP, Go and Python SDKs (@beexar/sdk, beexar/sdk, github.com/beexar-games/beexar-go, beexar on PyPI) plus a manual path for any other language implemented directly against the public OpenAPI contract. Wires up the launcher calls (launch a real or demo game session, list the operator catalogue) and the four inbound seamless-wallet callbacks — POST /balance, /betwin, /rollback, /finish — with X-REQUEST-SIGN HMAC-SHA256 verification over the raw request body, decimal-string money, idempotency on id_provider and rollback tombstones. Use this skill when integrating Beexar, building a seamless wallet or game-aggregator integration, implementing bet/win/rollback/balance callbacks, verifying X-REQUEST-SIGN, debugging a signature mismatch, or working with launch_url and casino_id.
+description: Integrate the Beexar casino game platform into a codebase. Covers the official Node, PHP, Go and Python SDKs (@beexar/sdk, beexar/sdk, github.com/beexar-games/beexar-go, beexar on PyPI) plus a manual path for any other language implemented directly against the public OpenAPI contract. Wires up the launcher calls (launch a real or demo game session, list the operator catalogue) and the four inbound seamless-wallet callbacks — POST /balance, /betwin, /rollback, /finish — with X-REQUEST-SIGN HMAC-SHA256 verification over the raw request body, decimal-string money, idempotency on id_provider and rollback tombstones, plus the optional freespins calls (Issue, Cancel, Bet/Levels) and the POST /freespins/finish callback. Use this skill when integrating Beexar, building a seamless wallet or game-aggregator integration, implementing bet/win/rollback/balance callbacks or freespins, verifying X-REQUEST-SIGN, debugging a signature mismatch, or working with launch_url and casino_id.
 ---
 
 # Beexar integration
@@ -15,6 +15,10 @@ the second one is the work.
   the player's money in the operator's own ledger. Every one is HMAC-signed and
   must be verified, idempotent, and answered inside a fixed time budget.
 
+Optional, for an operator that gives free rounds: **freespins** — three more
+calls you make (issue, cancel, bet levels) and a fifth callback,
+`POST /freespins/finish`, that reports once what an issue won.
+
 ## Contract this skill was built against
 
 <!-- BEGIN GENERATED: contract-versions -->
@@ -22,9 +26,9 @@ the second one is the work.
 | Contract | Version |
 |---|---|
 | `api/common/schemas.yaml` | `v.2026.06.20` |
-| `api/gateway.yaml` | `v.2026.09.28` |
-| `api/providers/softswiss/wallet.yaml` | `v.2026.03.03` |
-| `api/softswiss/gateway.yaml` | `v.2026.06.20` |
+| `api/gateway.yaml` | `v.2026.10.24` |
+| `api/providers/softswiss/wallet.yaml` | `v.2026.10.25` |
+| `api/softswiss/gateway.yaml` | `v.2026.10.26` |
 
 <!-- END GENERATED: contract-versions -->
 
@@ -42,7 +46,9 @@ Work out, from the codebase and not from assumption:
    - A wallet / ledger / player-account service → the four callbacks.
    - A player-facing site or app → the launcher (`launch_url` in an iframe).
    - A back-office tool → the catalogue.
-   - Most integrations need the callbacks *and* the launcher.
+   - A bonus or promotions engine that gives free rounds → freespins.
+   - Most integrations need the callbacks *and* the launcher. Freespins only
+     when the project asks for them.
 3. **Where HTTP routes and configuration live**, and **what the existing ledger
    looks like** — the callbacks have to run inside its transaction, so find it
    before writing anything.
@@ -58,6 +64,8 @@ If the project's purpose is unclear, ask rather than guess.
 - `references/error-codes.md` — the envelope and the full api_code registry.
 - `references/timings.md` — how long you have and what gets retried.
 - `references/launcher.md` — only if the project launches games.
+- `references/freespins.md` — only if the project gives free rounds: the three
+  calls, the `/freespins/finish` callback, its idempotency and the fifth URL.
 
 ## Step 3 — implement
 
@@ -66,7 +74,9 @@ If the project's purpose is unclear, ask rather than guess.
    `BEEXAR_BASE_URL` if the project needs to point at a non-production gateway.
 2. **Callbacks**: wire all four routes; the SDK verifies the signature, parses
    and validates before your code runs. Implement the four methods against the
-   existing ledger, inside one database transaction per request.
+   existing ledger, inside one database transaction per request. With
+   freespins, add the optional fifth method for `/freespins/finish` and record
+   each issue in the ledger before it is sent.
 3. **Launcher**: wrap the client in whatever service layer the project already
    uses. Put `launch_url` in an iframe; do not proxy the game.
 4. If the project has tests, add coverage for the new code. Do not scaffold a
@@ -120,6 +130,9 @@ the table at the top of this file.
 - **Never let the SDK own idempotency.** It cannot join your database
   transaction, so the dedupe check, the tombstone check and the balance update
   must all happen in yours.
+- **Never credit a `/freespins/finish` twice.** It is retried with the same body
+  until it gets a `200`; the second one answers the balance stored with the
+  first and credits nothing.
 - **Never hardcode credentials**, and never ship the API secret to a browser.
 
 Full documentation: https://docs.beexar.com
